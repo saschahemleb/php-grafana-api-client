@@ -1,0 +1,34 @@
+{
+    "name": "saschahemleb/php-grafana-api-client",
+    "description": "Grafana API client written in PHP",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Saschahemleb\\PhpGrafanaApiClient\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Saschahemleb\\PhpGrafanaApiClient\\Tests\\": "tests"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sascha Hemleb",
+            "email": "sascha@hemleb.de"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "psr/http-client-implementation": "^1.0",
+        "laminas/laminas-hydrator": "^4.3",
+        "php-http/discovery": "^1.14",
+        "php-http/client-common": "^2.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "spatie/docker": "^1.7",
+        "guzzlehttp/guzzle": "^7.4"
+    }
+}
