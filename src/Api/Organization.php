@@ -84,4 +84,9 @@ class Organization extends Api
     {
         $this->put("/orgs/{$organization->getId()}", $this->extract($organization));
     }
+
+    public function deleteUserInOrganization(int $organizationId, int $userId)
+    {
+        $this->delete("/orgs/{$organizationId}/users/{$userId}");
+    }
 }

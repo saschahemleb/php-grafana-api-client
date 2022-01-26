@@ -389,4 +389,21 @@ class IntegrationTest extends TestCase
         $this->expectException(RequestExceptionInterface::class);
         $client->organization()->getOrganizationById($organization->getId());
     }
+
+    public function testOrganizationDeleteUserInOrganization()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create(__METHOD__));
+        $user = $client->admin()->createNewUser(User::create(__METHOD__.'@localhost.de', __METHOD__, __METHOD__), __METHOD__);
+        $client->organization()->addUserInOrganization($organization->getId(), 'Editor', $user);
+
+        $client->organization()->deleteUserInOrganization($organization->getId(), $user->getId());
+
+        $remainingUsersInOrganization = $client->organization()->getUsersInOrganization($organization->getId());
+        $this->assertCount(1, $remainingUsersInOrganization);
+    }
 }
