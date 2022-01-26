@@ -25,7 +25,7 @@ class Client
     private HydratorInterface $hydrator;
 
     /**
-     * @param UriInterface $baseUri The uri to the grafana api endpoint (for example http://localhost:3000/api)
+     * @param UriInterface $baseUri The uri to the grafana endpoint (for example http://localhost:3000)
      * @param Plugin[] $plugins Additional plugins to use
      * @param ClientInterface|null $client The http client to use instead of auto-discovering one
      * @param RequestFactoryInterface|null $requestFactory Factory to create Request objects with, auto-discovered if left null
@@ -42,7 +42,7 @@ class Client
     ): self {
         $plugins = array_merge(
             [
-                new Plugin\BaseUriPlugin($baseUri),
+                new Plugin\BaseUriPlugin($baseUri->withPath($baseUri->getPath() . '/api/')),
                 new Plugin\HeaderSetPlugin(['Content-Type' => 'application/json']),
                 new Plugin\ErrorPlugin()
             ],

@@ -33,7 +33,7 @@ class IntegrationTest extends TestCase
             ->stopOnDestruct()
             ->start();
 
-        static::$baseUri = new Uri("http://localhost:$portOnHost/api");
+        static::$baseUri = new Uri("http://localhost:$portOnHost/");
 
         $client = Client::create(static::$baseUri, Authentication::basicAuth('admin', 'admin'));
         $amountOfTries = 10;
