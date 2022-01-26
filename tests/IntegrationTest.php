@@ -6,6 +6,7 @@ namespace Saschahemleb\PhpGrafanaApiClient\Tests;
 
 use GuzzleHttp\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Client\RequestExceptionInterface;
 use Saschahemleb\PhpGrafanaApiClient\Authentication;
 use Saschahemleb\PhpGrafanaApiClient\Client;
 use Saschahemleb\PhpGrafanaApiClient\Resource\GenericResponse;
@@ -356,5 +357,20 @@ class IntegrationTest extends TestCase
         $this->assertCount(2, $organizationUsers);
         $this->assertEquals($user->getId(), $organizationUsers[1]->getUserId());
         $this->assertEquals('Admin', $organizationUsers[1]->getRole());
+    }
+
+    public function testOrganizationDeleteOrganization()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create(__METHOD__));
+
+        $client->organization()->deleteOrganization($organization->getId());
+
+        $this->expectException(RequestExceptionInterface::class);
+        $client->organization()->getOrganizationById($organization->getId());
     }
 }

@@ -66,4 +66,17 @@ class Organization extends Api
 
         $this->patch("/orgs/$organizationId/users/{$user->getId()}", $data);
     }
+
+    public function deleteOrganization(int $organizationId)
+    {
+        $this->delete("/orgs/$organizationId");
+    }
+
+    public function getOrganizationById(int $organizationId): OrganizationResource
+    {
+        return $this->hydrate(
+            $this->get("/orgs/$organizationId"),
+            new OrganizationResource()
+        );
+    }
 }

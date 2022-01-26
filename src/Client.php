@@ -42,7 +42,9 @@ class Client
     ): self {
         $plugins = array_merge(
             [
-                new Plugin\BaseUriPlugin($baseUri->withPath($baseUri->getPath() . '/api/')),
+                new Plugin\BaseUriPlugin($baseUri->withPath(
+                    rtrim($baseUri->getPath(), '/').'/api'
+                )),
                 new Plugin\HeaderSetPlugin(['Content-Type' => 'application/json']),
                 new Plugin\ErrorPlugin()
             ],

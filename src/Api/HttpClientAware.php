@@ -49,6 +49,16 @@ trait HttpClientAware
         );
     }
 
+    protected function delete(string $uri, array $parameters = []): ResponseInterface
+    {
+        return $this->httpClient->sendRequest(
+            $this->requestFactory->createRequest(
+                'DELETE',
+                $this->createUri($uri, $parameters)
+            )
+        );
+    }
+
     protected function createUri(string $uri, array $parameters): UriInterface
     {
         return $this->uriFactory->createUri($uri)->withQuery(http_build_query($parameters));
