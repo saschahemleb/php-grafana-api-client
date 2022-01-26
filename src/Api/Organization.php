@@ -48,23 +48,23 @@ class Organization extends Api
         return $this->hydrateRaw(['id' => $response->orgId] + $data, new OrganizationResource());
     }
 
-    public function addUserInOrganization(int $organizationId, string $role, UserResource $user)
+    public function addUserInOrganization(int $organizationId, string $role, string $userLoginOrEmail)
     {
         $data = [
-            'loginOrEmail' => $user->getEmail() ?? $user->getLogin(),
+            'loginOrEmail' => $userLoginOrEmail,
             'role' => $role,
         ];
 
         $this->post("/orgs/$organizationId/users", $data);
     }
 
-    public function updateUserInOrganization(int $organizationId, string $role, UserResource $user)
+    public function updateUserInOrganization(int $organizationId, string $role, int $userId)
     {
         $data = [
             'Role' => $role,
         ];
 
-        $this->patch("/orgs/$organizationId/users/{$user->getId()}", $data);
+        $this->patch("/orgs/$organizationId/users/$userId", $data);
     }
 
     public function deleteOrganization(int $organizationId)
