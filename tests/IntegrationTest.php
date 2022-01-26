@@ -307,7 +307,7 @@ class IntegrationTest extends TestCase
         $newOrganization = $client->organization()->createOrganization($organization);
 
         $this->assertInstanceOf(Organization::class, $newOrganization);
-        $this->assertSame(2, $newOrganization->getId());
+        $this->assertIsInt($newOrganization->getId());
         $this->assertSame('MyTestOrg', $newOrganization->getName());
 
         return $newOrganization;
@@ -357,6 +357,22 @@ class IntegrationTest extends TestCase
         $this->assertCount(2, $organizationUsers);
         $this->assertEquals($user->getId(), $organizationUsers[1]->getUserId());
         $this->assertEquals('Admin', $organizationUsers[1]->getRole());
+    }
+
+    /**
+     * @depends testOrganizationCreateOrganization
+     */
+    public function testOrganizationUpdateOrganization(Organization $organization)
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization->setName(__METHOD__);
+
+        $client->organization()->updateOrganization($organization);
+        $this->assertEquals(__METHOD__, $client->organization()->getOrganizationById($organization->getId())->getName());
     }
 
     public function testOrganizationDeleteOrganization()

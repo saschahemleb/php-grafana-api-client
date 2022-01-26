@@ -79,4 +79,9 @@ class Organization extends Api
             new OrganizationResource()
         );
     }
+
+    public function updateOrganization(OrganizationResource $organization)
+    {
+        $this->put("/orgs/{$organization->getId()}", $this->extract($organization));
+    }
 }

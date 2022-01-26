@@ -33,4 +33,11 @@ class Organization implements Resource
     {
         return $this->name;
     }
+
+    public function setName(string $name): Organization
+    {
+        $this->name = $name;
+
+        return $this;
+    }
 }
