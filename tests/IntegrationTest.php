@@ -266,6 +266,24 @@ class IntegrationTest extends TestCase
         return $user;
     }
 
+    public function testAdminDeleteUser()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $user = $client->admin()->createNewUser(
+            User::create(__METHOD__.'@localhost.de', __METHOD__, __METHOD__),
+            __METHOD__
+        );
+
+        $client->admin()->deleteUser($user->getId());
+
+        $this->expectException(RequestExceptionInterface::class);
+        $client->user()->getSingleUserById($user->getId());
+    }
+
     public function testOrganizationGetCurrentOrganization()
     {
         $credentials = ['admin', 'admin'];
@@ -328,7 +346,7 @@ class IntegrationTest extends TestCase
         $client->organization()->addUserInOrganization(
             $organization->getId(),
             'Viewer',
-            $user,
+            $user->getLogin(),
         );
 
         $this->assertCount(2, $client->organization()->getUsersInOrganization($organization->getId()));
@@ -350,7 +368,7 @@ class IntegrationTest extends TestCase
         $client->organization()->updateUserInOrganization(
             $organization->getId(),
             'Admin',
-            $user,
+            $user->getId(),
         );
 
         $organizationUsers = $client->organization()->getUsersInOrganization($organization->getId());
@@ -399,7 +417,7 @@ class IntegrationTest extends TestCase
         );
         $organization = $client->organization()->createOrganization(Organization::create(__METHOD__));
         $user = $client->admin()->createNewUser(User::create(__METHOD__.'@localhost.de', __METHOD__, __METHOD__), __METHOD__);
-        $client->organization()->addUserInOrganization($organization->getId(), 'Editor', $user);
+        $client->organization()->addUserInOrganization($organization->getId(), 'Editor', __METHOD__);
 
         $client->organization()->deleteUserInOrganization($organization->getId(), $user->getId());
 

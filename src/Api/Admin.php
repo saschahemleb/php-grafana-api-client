@@ -24,4 +24,9 @@ class Admin extends Api
             new UserResource()
         );
     }
+
+    public function deleteUser(int $userId)
+    {
+        $this->delete("/admin/users/$userId");
+    }
 }
