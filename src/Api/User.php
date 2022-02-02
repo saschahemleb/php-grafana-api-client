@@ -88,4 +88,9 @@ class User extends Api
             new UserResource()
         );
     }
+
+    public function switchContextForActualUser(int $organizationId): void
+    {
+        $this->post("/user/using/{$organizationId}", []);
+    }
 }

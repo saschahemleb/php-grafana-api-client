@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\RequestExceptionInterface;
 use Saschahemleb\PhpGrafanaApiClient\Authentication;
 use Saschahemleb\PhpGrafanaApiClient\Client;
+use Saschahemleb\PhpGrafanaApiClient\Resource\Datasource;
 use Saschahemleb\PhpGrafanaApiClient\Resource\GenericResponse;
 use Saschahemleb\PhpGrafanaApiClient\Resource\Organization;
 use Saschahemleb\PhpGrafanaApiClient\Resource\OrganizationUser;
@@ -423,5 +424,40 @@ class IntegrationTest extends TestCase
 
         $remainingUsersInOrganization = $client->organization()->getUsersInOrganization($organization->getId());
         $this->assertCount(1, $remainingUsersInOrganization);
+    }
+
+    /**
+     * @depends testOrganizationCreateOrganization
+     */
+    public function testDatasourceCreateDatasource(Organization $organization)
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+
+        $datasource = $client->inOrganization($organization->getId(), function (Client $client) {
+            return $client->datasource()->createDatasource(
+                (new Datasource(
+                    'testDatasource',
+                    'prometheus',
+                    'http://prometheus.local',
+                ))
+                ->setJsonData([
+                    'httpHeaderName1' => 'X-Scope-Orgid',
+                    'httpMethod' => 'POST',
+                ])
+                ->setSecureJsonData(['httpHeaderValue1' => 'my-orgid'])
+            );
+        });
+
+        $this->assertInstanceOf(Datasource::class, $datasource);
+        $this->assertIsInt($datasource->getId());
+        $this->assertEquals($organization->getId(), $datasource->getOrganizationId());
+        $this->assertEquals('testDatasource', $datasource->getName());
+        $this->assertEquals('prometheus', $datasource->getType());
+        $this->assertEquals('http://prometheus.local', $datasource->getUrl());
+        $this->assertEquals(['httpHeaderName1' => 'X-Scope-Orgid', 'httpMethod' => 'POST'], $datasource->getJsonData());
     }
 }
