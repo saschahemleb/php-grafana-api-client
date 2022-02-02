@@ -490,4 +490,24 @@ class IntegrationTest extends TestCase
         $this->assertEquals('http://prometheus.local', $datasource->getUrl());
         $this->assertEmpty($datasource->getJsonData());
     }
+
+    /**
+     * @depends testOrganizationCreateOrganization
+     */
+    public function testInOrganization(Organization $organization)
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+
+        $testOrganization = $client->inOrganization($organization->getId(), fn() => $client->organization()->getCurrentOrganization());
+        $mainOrgOrganization = $client->organization()->getCurrentOrganization();
+
+        $this->assertInstanceOf(Organization::class, $mainOrgOrganization);
+        $this->assertInstanceOf(Organization::class, $testOrganization);
+        $this->assertEquals(1, $mainOrgOrganization->getId());
+        $this->assertEquals($organization->getId(), $testOrganization->getId());
+    }
 }

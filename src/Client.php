@@ -58,7 +58,10 @@ class Client
     public function inOrganization(int $organizationId, callable $callable): mixed
     {
         $this->organizationPlugin->set($organizationId);
-        return call_user_func($callable, $this);
+        $result = call_user_func($callable, $this);
+        $this->organizationPlugin->reset();
+        
+        return $result;
     }
 
     public function user(): User
