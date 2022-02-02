@@ -6,10 +6,12 @@ namespace Saschahemleb\PhpGrafanaApiClient;
 
 use Laminas\Hydrator\AbstractHydrator;
 use Laminas\Hydrator\HydratorInterface;
+use Laminas\Hydrator\ObjectPropertyHydrator;
 use Laminas\Hydrator\ReflectionHydrator;
 use Laminas\Hydrator\Strategy\CollectionStrategy;
 use Laminas\Hydrator\Strategy\DateTimeFormatterStrategy;
 use Laminas\Hydrator\Strategy\DateTimeImmutableFormatterStrategy;
+use Laminas\Hydrator\Strategy\HydratorStrategy;
 use Laminas\Hydrator\Strategy\StrategyEnabledInterface;
 use Saschahemleb\PhpGrafanaApiClient\Resource\User;
 
@@ -24,6 +26,7 @@ class HydratorFactory
 
         self::addCommonStrategies($hydrator);
         self::addUserResourceStrategies($hydrator);
+        self::addDatasourceResourceStrategies($hydrator);
 
         return $hydrator;
     }
@@ -66,6 +69,17 @@ class HydratorFactory
             'lastSeenAt',
             new DateTimeImmutableFormatterStrategy(
                 new DateTimeFormatterStrategy()
+            )
+        );
+    }
+
+    private static function addDatasourceResourceStrategies(ReflectionHydrator $hydrator)
+    {
+        $hydrator->addStrategy(
+            'jsonData',
+            new HydratorStrategy(
+                new ObjectPropertyHydrator(),
+                \stdClass::class
             )
         );
     }

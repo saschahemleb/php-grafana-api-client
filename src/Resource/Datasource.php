@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Saschahemleb\PhpGrafanaApiClient\Resource;
 
+use stdClass;
+
 class Datasource implements Resource
 {
     private string $name;
@@ -22,8 +24,8 @@ class Datasource implements Resource
     private string $database = '';
     private bool $withCredentials = false;
     private bool $isDefault = false;
-    private array $jsonData = [];
-    private array $secureJsonData = [];
+    private \stdClass $jsonData;
+    private \stdClass $secureJsonData;
     private int $version = 1;
     private bool $readOnly = true;
 
@@ -32,17 +34,20 @@ class Datasource implements Resource
         $this->name = $name;
         $this->type = $type;
         $this->url = $url;
+
+        $this->jsonData = new stdClass();
+        $this->secureJsonData = new stdClass();
     }
 
     public function setJsonData(array $jsonData): Datasource
     {
-        $this->jsonData = $jsonData;
+        $this->jsonData = (object)$jsonData;
         return $this;
     }
 
     public function setSecureJsonData(array $secureJsonData): Datasource
     {
-        $this->secureJsonData = $secureJsonData;
+        $this->secureJsonData = (object)$secureJsonData;
         return $this;
     }
 
@@ -73,6 +78,6 @@ class Datasource implements Resource
 
     public function getJsonData(): array
     {
-        return $this->jsonData;
+        return (array)$this->jsonData;
     }
 }

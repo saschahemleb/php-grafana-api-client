@@ -444,11 +444,11 @@ class IntegrationTest extends TestCase
                     'prometheus',
                     'http://prometheus.local',
                 ))
-                ->setJsonData([
-                    'httpHeaderName1' => 'X-Scope-Orgid',
-                    'httpMethod' => 'POST',
-                ])
-                ->setSecureJsonData(['httpHeaderValue1' => 'my-orgid'])
+                    ->setJsonData([
+                        'httpHeaderName1' => 'X-Scope-Orgid',
+                        'httpMethod' => 'POST',
+                    ])
+                    ->setSecureJsonData(['httpHeaderValue1' => 'my-orgid'])
             );
         });
 
@@ -459,5 +459,35 @@ class IntegrationTest extends TestCase
         $this->assertEquals('prometheus', $datasource->getType());
         $this->assertEquals('http://prometheus.local', $datasource->getUrl());
         $this->assertEquals(['httpHeaderName1' => 'X-Scope-Orgid', 'httpMethod' => 'POST'], $datasource->getJsonData());
+    }
+
+    /**
+     * @depends testOrganizationCreateOrganization
+     */
+    public function testDatasourceCreateDatasourceWithoutJsonData(Organization $organization)
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+
+        $datasource = $client->inOrganization($organization->getId(), function (Client $client) {
+            return $client->datasource()->createDatasource(
+                (new Datasource(
+                    'testDatasourceWithoutJsonData',
+                    'prometheus',
+                    'http://prometheus.local',
+                ))
+            );
+        });
+
+        $this->assertInstanceOf(Datasource::class, $datasource);
+        $this->assertIsInt($datasource->getId());
+        $this->assertEquals($organization->getId(), $datasource->getOrganizationId());
+        $this->assertEquals('testDatasourceWithoutJsonData', $datasource->getName());
+        $this->assertEquals('prometheus', $datasource->getType());
+        $this->assertEquals('http://prometheus.local', $datasource->getUrl());
+        $this->assertEmpty($datasource->getJsonData());
     }
 }
