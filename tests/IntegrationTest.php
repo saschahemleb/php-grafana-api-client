@@ -439,11 +439,11 @@ class IntegrationTest extends TestCase
 
         $datasource = $client->inOrganization($organization->getId(), function (Client $client) {
             return $client->datasource()->createDatasource(
-                (new Datasource(
+                Datasource::create(
                     'testDatasource',
                     'prometheus',
                     'http://prometheus.local',
-                ))
+                )
                     ->setJsonData([
                         'httpHeaderName1' => 'X-Scope-Orgid',
                         'httpMethod' => 'POST',
@@ -474,11 +474,11 @@ class IntegrationTest extends TestCase
 
         $datasource = $client->inOrganization($organization->getId(), function (Client $client) {
             return $client->datasource()->createDatasource(
-                (new Datasource(
+                Datasource::create(
                     'testDatasourceWithoutJsonData',
                     'prometheus',
                     'http://prometheus.local',
-                ))
+                )
             );
         });
 
@@ -489,6 +489,215 @@ class IntegrationTest extends TestCase
         $this->assertEquals('prometheus', $datasource->getType());
         $this->assertEquals('http://prometheus.local', $datasource->getUrl());
         $this->assertEmpty($datasource->getJsonData());
+    }
+
+    public function testDatasourceGetAllDatasources()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceGetAllDatasources'));
+        $client->inOrganization($organization->getId(), function (Client $client) {
+            $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceGetAllDatasources1',
+                    'prometheus',
+                    'http://prometheus.local',
+                ));
+            $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceGetAllDatasources2',
+                    'prometheus',
+                    'http://prometheus.local',
+                )
+                    ->setJsonData([
+                        'httpHeaderName1' => 'X-Scope-Orgid',
+                        'httpMethod' => 'POST',
+                    ])
+                    ->setSecureJsonData(['httpHeaderValue1' => 'my-orgid'])
+            );
+        });
+
+        $datasources = $client->inOrganization($organization->getId(), fn() => $client->datasource()->getAllDatasources());
+
+        $this->assertCount(2, $datasources);
+        $firstDatasource = $datasources[0];
+        $this->assertInstanceOf(Datasource::class, $firstDatasource);
+    }
+
+    public function testDatasourceGetDatasourceById()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceGetDatasourceById'));
+        $datasourceId = null;
+        $client->inOrganization($organization->getId(), function (Client $client) use (&$datasourceId) {
+            $datasource = $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceGetDatasourceById',
+                    'prometheus',
+                    'http://prometheus.local',
+                ));
+            $datasourceId = $datasource->getId();
+        });
+
+        $datasource = $client->inOrganization($organization->getId(), fn() => $client->datasource()->getDatasourceById($datasourceId));
+
+        $this->assertInstanceOf(Datasource::class, $datasource);
+        $this->assertEquals('testDatasourceGetDatasourceById', $datasource->getName());
+    }
+
+    public function testDatasourceGetDatasourceByUid()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceGetDatasourceByUid'));
+        $datasourceUid = 'kLtEtcRGk';
+        $client->inOrganization($organization->getId(), function (Client $client) use ($datasourceUid) {
+            $datasource = $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceGetDatasourceById',
+                    'prometheus',
+                    'http://prometheus.local',
+                )->setUid($datasourceUid)
+            );
+        });
+
+        $datasource = $client->inOrganization($organization->getId(), fn() => $client->datasource()->getDatasourceByUid($datasourceUid));
+
+        $this->assertInstanceOf(Datasource::class, $datasource);
+        $this->assertEquals('testDatasourceGetDatasourceById', $datasource->getName());
+    }
+
+    public function testDatasourceGetDatasourceByName()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceGetDatasourceByName'));
+        $name = 'testDatasourceGetDatasourceByName';
+        $client->inOrganization($organization->getId(), function (Client $client) use ($name) {
+            $datasource = $client->datasource()->createDatasource(
+                Datasource::create(
+                    $name,
+                    'prometheus',
+                    'http://prometheus.local',
+                )
+            );
+        });
+
+        $datasource = $client->inOrganization($organization->getId(), fn() => $client->datasource()->getDatasourceByName($name));
+
+        $this->assertInstanceOf(Datasource::class, $datasource);
+        $this->assertEquals($name, $datasource->getName());
+    }
+
+    public function testDatasourceUpdateDatasource()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceUpdateDatasource'));
+        /** @var Datasource $datasource */
+        $datasource = $client->inOrganization($organization->getId(), function (Client $client) {
+            return $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceUpdateDatasource1',
+                    'prometheus',
+                    'http://prometheus.local',
+                )
+            );
+        });
+
+        $datasource->setName('testDatasourceUpdateDatasource2');
+        $updated = $client->inOrganization($organization->getId(), fn() => $client->datasource()->updateDatasource($datasource));
+
+        $this->assertInstanceOf(Datasource::class, $updated);
+        $this->assertEquals('testDatasourceUpdateDatasource2', $updated->getName());
+    }
+
+    public function testDatasourceDeleteDatasourceById()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceDeleteDatasourceById'));
+        $datasourceId = null;
+        $client->inOrganization($organization->getId(), function (Client $client) use (&$datasourceId) {
+            $datasource = $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceDeleteDatasourceById',
+                    'prometheus',
+                    'http://prometheus.local',
+                ));
+            $datasourceId = $datasource->getId();
+        });
+
+        $client->inOrganization($organization->getId(), fn() => $client->datasource()->deleteDatasourceById($datasourceId));
+
+        $this->assertCount(0, $client->inOrganization($organization->getId(), fn() => $client->datasource()->getAllDatasources()));
+    }
+
+    public function testDatasourceDeleteDatasourceByUid()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceDeleteDatasourceByUid'));
+        $datasourceUid = 'sOasW2AxD';
+        $client->inOrganization($organization->getId(), function (Client $client) use ($datasourceUid) {
+            $datasource = $client->datasource()->createDatasource(
+                Datasource::create(
+                    'testDatasourceDeleteDatasourceByUid',
+                    'prometheus',
+                    'http://prometheus.local',
+                )->setUid($datasourceUid)
+            );
+        });
+
+        $client->inOrganization($organization->getId(), fn() => $client->datasource()->deleteDatasourceByUid($datasourceUid));
+
+        $this->assertCount(0, $client->inOrganization($organization->getId(), fn() => $client->datasource()->getAllDatasources()));
+    }
+
+    public function testDatasourceDeleteDatasourceByName()
+    {
+        $credentials = ['admin', 'admin'];
+        $client = Client::create(
+            static::$baseUri,
+            Authentication::basicAuth(...$credentials)
+        );
+        $organization = $client->organization()->createOrganization(Organization::create('testDatasourceDeleteDatasourceByName'));
+        $datasourceName = 'testDatasourceDeleteDatasourceByName';
+        $client->inOrganization($organization->getId(), function (Client $client) use ($datasourceName) {
+            $datasource = $client->datasource()->createDatasource(
+                Datasource::create(
+                    $datasourceName,
+                    'prometheus',
+                    'http://prometheus.local',
+                )
+            );
+        });
+
+        $client->inOrganization($organization->getId(), fn() => $client->datasource()->deleteDatasourceByName($datasourceName));
+
+        $this->assertCount(0, $client->inOrganization($organization->getId(), fn() => $client->datasource()->getAllDatasources()));
     }
 
     /**

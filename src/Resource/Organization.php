@@ -9,7 +9,7 @@ class Organization implements Resource
     private int $id;
     private string $name;
 
-    public static function create(string $name)
+    public static function create(string $name): self
     {
         $org = new self;
         $org->id = 0;

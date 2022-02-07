@@ -60,7 +60,7 @@ class Client
         $this->organizationPlugin->set($organizationId);
         $result = call_user_func($callable, $this);
         $this->organizationPlugin->reset();
-        
+
         return $result;
     }
 

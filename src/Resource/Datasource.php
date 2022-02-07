@@ -13,6 +13,7 @@ class Datasource implements Resource
     private string $url;
 
     private ?int $id = null;
+    private ?string $uid = null;
     private ?int $orgId = null;
     private string $access = 'proxy';
     private bool $basicAuth = false;
@@ -25,18 +26,21 @@ class Datasource implements Resource
     private bool $withCredentials = false;
     private bool $isDefault = false;
     private \stdClass $jsonData;
-    private \stdClass $secureJsonData;
+    private ?\stdClass $secureJsonData = null;
     private int $version = 1;
     private bool $readOnly = true;
 
-    public function __construct(string $name, string $type, string $url)
+    public static function create(string $name, string $type, string $url): self
     {
-        $this->name = $name;
-        $this->type = $type;
-        $this->url = $url;
+        $org = new self;
+        $org->name = $name;
+        $org->type = $type;
+        $org->url = $url;
 
-        $this->jsonData = new stdClass();
-        $this->secureJsonData = new stdClass();
+        $org->jsonData = new stdClass();
+        $org->secureJsonData = new stdClass();
+
+        return $org;
     }
 
     public function setJsonData(array $jsonData): Datasource
@@ -48,6 +52,18 @@ class Datasource implements Resource
     public function setSecureJsonData(array $secureJsonData): Datasource
     {
         $this->secureJsonData = (object)$secureJsonData;
+        return $this;
+    }
+
+    public function setUid(string $uid): Datasource
+    {
+        $this->uid = $uid;
+        return $this;
+    }
+
+    public function setName(string $name)
+    {
+        $this->name = $name;
         return $this;
     }
 

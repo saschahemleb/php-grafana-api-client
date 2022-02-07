@@ -20,7 +20,7 @@ class User implements Resource
     private \DateTimeImmutable $createdAt;
     private ?string $avatarUrl = null;
 
-    public static function create(string $email, string $name, string $login)
+    public static function create(string $email, string $name, string $login): self
     {
         $user = new self;
         $user->id = 0;

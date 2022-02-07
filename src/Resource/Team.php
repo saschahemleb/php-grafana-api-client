@@ -13,7 +13,7 @@ class Team implements Resource
     private \DateTimeImmutable $created;
     private \DateTimeImmutable $updated;
 
-    public static function create(string $name, int $orgId = 1)
+    public static function create(string $name, int $orgId = 1): self
     {
         $team = new Team();
         $team->id = 0;
