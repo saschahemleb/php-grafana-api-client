@@ -27,6 +27,7 @@ class Client
 {
     private HydratorInterface $hydrator;
     private OrganizationHeaderPlugin $organizationPlugin;
+    private PluginClient $client;
 
     /**
      * @param UriInterface $baseUri The uri to the grafana endpoint (for example http://localhost:3000)

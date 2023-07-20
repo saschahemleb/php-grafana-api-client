@@ -67,6 +67,12 @@ class Datasource implements Resource
         return $this;
     }
 
+    public function setUrl(string $url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

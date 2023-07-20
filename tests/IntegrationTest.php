@@ -21,12 +21,17 @@ use Saschahemleb\PhpGrafanaApiClient\Resource\UserOrganization;
 use Saschahemleb\PhpGrafanaApiClient\Resource\UserTeam;
 use Spatie\Docker\DockerContainer;
 use Spatie\Docker\DockerContainerInstance;
+use Spatie\Docker\Exceptions\CouldNotStartDockerContainer;
 
 class IntegrationTest extends TestCase
 {
     private static DockerContainerInstance $grafana;
     private static Uri $baseUri;
 
+    /**
+     * @throws CouldNotStartDockerContainer
+     * @throws \Throwable
+     */
     public static function setUpBeforeClass(): void
     {
         $portOnHost = (int)getenv('GRAFANA_CONTAINER_PORT');
@@ -38,7 +43,7 @@ class IntegrationTest extends TestCase
         static::$baseUri = new Uri("http://localhost:$portOnHost/");
 
         $client = Client::create(static::$baseUri, Authentication::basicAuth('admin', 'admin'));
-        $amountOfTries = 10;
+        $amountOfTries = 100;
         do {
             try {
                 $health = $client->other()->health();
@@ -622,10 +627,12 @@ class IntegrationTest extends TestCase
         });
 
         $datasource->setName('testDatasourceUpdateDatasource2');
+        $datasource->setUrl('https://prometheus.local');
         $updated = $client->inOrganization($organization->getId(), fn() => $client->datasource()->updateDatasource($datasource));
 
         $this->assertInstanceOf(Datasource::class, $updated);
         $this->assertEquals('testDatasourceUpdateDatasource2', $updated->getName());
+        $this->assertEquals('https://prometheus.local', $updated->getUrl());
     }
 
     public function testDatasourceDeleteDatasourceById()
